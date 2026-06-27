@@ -4,22 +4,18 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
 const VALORANT_MAPS = [
-  // Current rotation (V25 Act 1)
   { name: 'Abyss',    img: 'https://www.mapban.gg/images/maps/valorant/abyss.jpg' },
+  { name: 'Ascent',   img: 'https://www.mapban.gg/images/maps/valorant/ascent.jpg' },
   { name: 'Bind',     img: 'https://www.mapban.gg/images/maps/valorant/bind.jpg' },
+  { name: 'Breeze',   img: 'https://www.mapban.gg/images/maps/valorant/breeze.jpg' },
   { name: 'Corrode',  img: 'https://www.mapban.gg/images/maps/valorant/corrode.jpg' },
+  { name: 'Fracture', img: 'https://www.mapban.gg/images/maps/valorant/fracture.jpg' },
   { name: 'Haven',    img: 'https://www.mapban.gg/images/maps/valorant/haven.jpg' },
+  { name: 'Icebox',   img: 'https://www.mapban.gg/images/maps/valorant/icebox.jpg' },
+  { name: 'Lotus',    img: 'https://www.mapban.gg/images/maps/valorant/lotus.jpg' },
   { name: 'Pearl',    img: 'https://www.mapban.gg/images/maps/valorant/perl.jpg' },
   { name: 'Split',    img: 'https://www.mapban.gg/images/maps/valorant/split.jpg' },
   { name: 'Sunset',   img: 'https://www.mapban.gg/images/maps/valorant/sunset.jpg' },
-  // New map
-  { name: 'Summit',   img: 'https://www.mapban.gg/images/maps/valorant/summit.jpg' },
-  // Rotated out maps
-  { name: 'Ascent',   img: 'https://www.mapban.gg/images/maps/valorant/ascent.jpg' },
-  { name: 'Breeze',   img: 'https://www.mapban.gg/images/maps/valorant/breeze.jpg' },
-  { name: 'Fracture', img: 'https://www.mapban.gg/images/maps/valorant/fracture.jpg' },
-  { name: 'Icebox',   img: 'https://www.mapban.gg/images/maps/valorant/icebox.jpg' },
-  { name: 'Lotus',    img: 'https://www.mapban.gg/images/maps/valorant/lotus.jpg' },
 ];
 
 // Standard sequences per format

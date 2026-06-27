@@ -16,12 +16,10 @@ interface AuthContextValue {
   user: User | null;
   userRole: UserRoleRecord | null;
   loading: boolean;
-  authError: string | null;
   signIn: (email: string, password: string) => Promise<string | null>;
   signUp: (email: string, password: string, asFan?: boolean) => Promise<string | null>;
   signOut: () => Promise<void>;
   refreshRole: () => Promise<void>;
-  clearAuthError: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -31,40 +29,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<UserRoleRecord | null>(null);
   const [loading, setLoading] = useState(true);
-  const [authError, setAuthError] = useState<string | null>(null);
 
   async function fetchRole(userId: string) {
-    try {
-      console.log("Fetching user role for userId:", userId);
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role, tournament_mode, team_id, team_id8')
-        .eq('user_id', userId)
-        .maybeSingle();
-      
-      if (error) {
-        console.error('Error fetching user role:', JSON.stringify(error, null, 2));
-        setAuthError(`Error al consultar el rol: ${error.message}`);
-        setUserRole(null);
-        return;
-      }
-      
-      console.log("Fetched user role data:", data);
-      setUserRole(data as UserRoleRecord | null);
-      setAuthError(null);
-    } catch (err) {
-      console.error('Unexpected error fetching user role:', err);
-      setAuthError('Error inesperado al consultar el rol');
-      setUserRole(null);
-    }
+    const { data } = await supabase
+      .from('user_roles')
+      .select('role, tournament_mode, team_id, team_id8')
+      .eq('user_id', userId)
+      .maybeSingle();
+    setUserRole(data as UserRoleRecord | null);
   }
 
   async function refreshRole() {
     if (user) await fetchRole(user.id);
-  }
-
-  function clearAuthError() {
-    setAuthError(null);
   }
 
   useEffect(() => {
@@ -94,50 +70,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function signIn(email: string, password: string): Promise<string | null> {
-    setAuthError(null);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setAuthError(error.message);
-      return error.message;
-    }
-    return null;
+    return error?.message ?? null;
   }
 
   async function signUp(email: string, password: string, asFan = false): Promise<string | null> {
-    setAuthError(null);
     const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-      setAuthError(error.message);
-      return error.message;
-    }
+    if (error) return error.message;
     // Auto-assign fan role immediately so they don't land on pending screen
     if (asFan && data.user) {
-      try {
-        const { error: roleError } = await supabase.from('user_roles').insert({
-          user_id: data.user.id,
-          role: 'fan',
-          tournament_mode: null,
-          team_id: null,
-          team_id8: null,
-        });
-        
-        if (roleError) {
-          console.error('Error assigning fan role:', roleError);
-        }
-      } catch (err) {
-        console.error('Unexpected error assigning fan role:', err);
-      }
+      await supabase.from('user_roles').insert({
+        user_id: data.user.id,
+        role: 'fan',
+        tournament_mode: null,
+        team_id: null,
+        team_id8: null,
+      });
     }
     return null;
   }
 
   async function signOut() {
-    setAuthError(null);
     await supabase.auth.signOut();
   }
 
   return (
-    <AuthContext.Provider value={{ session, user, userRole, loading, authError, signIn, signUp, signOut, refreshRole, clearAuthError }}>
+    <AuthContext.Provider value={{ session, user, userRole, loading, signIn, signUp, signOut, refreshRole }}>
       {children}
     </AuthContext.Provider>
   );

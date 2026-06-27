@@ -1,48 +1,38 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Gamepad2, Mail, Lock, Eye, EyeOff, LogIn, UserPlus, AlertCircle, Users, Shield } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 type AuthMode = 'login' | 'register_fan' | 'register_staff';
 
 export default function LoginPage() {
-  const { signIn, signUp, authError, clearAuthError } = useAuth();
+  const { signIn, signUp } = useAuth();
   const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [localError, setLocalError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (authError) {
-      setLocalError(translateError(authError));
-    }
-  }, [authError]);
-
-  useEffect(() => {
-    clearAuthError();
-  }, [mode]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLocalError(null);
+    setError(null);
     setSuccess(null);
-    if (!email.trim() || !password.trim()) { setLocalError('Completa todos los campos.'); return; }
-    if (password.length < 6) { setLocalError('La contraseña debe tener al menos 6 caracteres.'); return; }
+    if (!email.trim() || !password.trim()) { setError('Completa todos los campos.'); return; }
+    if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres.'); return; }
 
     setLoading(true);
     try {
       if (mode === 'login') {
         const err = await signIn(email, password);
-        if (err) setLocalError(translateError(err));
+        if (err) setError(translateError(err));
       } else if (mode === 'register_fan') {
         const err = await signUp(email, password, true);
-        if (err) { setLocalError(translateError(err)); }
-        else { setSuccess('¡Cuenta creada! Ahora puedes iniciar sesión como fan.'); setMode('login'); setPassword(''); }
+        if (err) { setError(translateError(err)); }
+        else { setSuccess('¡Cuenta creada! Ahora puedes iniciar sesion como fan.'); setMode('login'); setPassword(''); }
       } else {
         const err = await signUp(email, password, false);
-        if (err) { setLocalError(translateError(err)); }
+        if (err) { setError(translateError(err)); }
         else { setSuccess('Cuenta creada. Un administrador asignará tu rol antes de que puedas acceder.'); setMode('login'); setPassword(''); }
       }
     } finally {
@@ -75,19 +65,19 @@ export default function LoginPage() {
           {/* Mode toggle */}
           <div className="flex rounded-xl bg-gray-900 p-1 mb-6">
             <button
-              onClick={() => { setMode('login'); setLocalError(null); setSuccess(null); }}
+              onClick={() => { setMode('login'); setError(null); setSuccess(null); }}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'login' ? 'bg-red-600 text-white shadow shadow-red-900/50' : 'text-gray-400 hover:text-white'}`}
             >
               <LogIn className="w-3.5 h-3.5" /> Iniciar Sesión
             </button>
             <button
-              onClick={() => { setMode('register_fan'); setLocalError(null); setSuccess(null); }}
+              onClick={() => { setMode('register_fan'); setError(null); setSuccess(null); }}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'register_fan' ? 'bg-red-600 text-white shadow shadow-red-900/50' : 'text-gray-400 hover:text-white'}`}
             >
               <Users className="w-3.5 h-3.5" /> Fan
             </button>
             <button
-              onClick={() => { setMode('register_staff'); setLocalError(null); setSuccess(null); }}
+              onClick={() => { setMode('register_staff'); setError(null); setSuccess(null); }}
               className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${mode === 'register_staff' ? 'bg-red-600 text-white shadow shadow-red-900/50' : 'text-gray-400 hover:text-white'}`}
             >
               <Shield className="w-3.5 h-3.5" /> Equipo
@@ -113,9 +103,9 @@ export default function LoginPage() {
               <AlertCircle className="w-4 h-4 flex-shrink-0" /> {success}
             </div>
           )}
-          {localError && (
+          {error && (
             <div className="mb-4 flex items-center gap-2 p-3 rounded-lg bg-red-900/30 border border-red-700/40 text-red-300 text-sm">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" /> {localError}
+              <AlertCircle className="w-4 h-4 flex-shrink-0" /> {error}
             </div>
           )}
 
